@@ -1,0 +1,23 @@
+{
+  "name": "oncquest-automation",
+  "version": "1.0.0",
+  "description": "Playwright (JavaScript) UI automation suite for https://oncquestlabs.com",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:headed": "playwright test --headed --workers=1",
+    "test:desktop": "playwright test --project=chromium",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report reports/html-report"
+  },
+  "keywords": ["playwright", "automation", "oncquest"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "dotenv": "^16.4.5"
+  }
+}
