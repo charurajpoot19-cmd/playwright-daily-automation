@@ -36,3 +36,33 @@ jobs:
           name: playwright-html-report
           path: reports/html-report/
           retention-days: 30
+
+      # Builds reports/email-report.html, the PDF report and the subject line from the JSON report
+      - name: Build Email Report
+        id: email_report
+        if: always()
+        run: node scripts/email-report.js
+
+      - name: Upload PDF Report
+        if: always() && steps.email_report.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: oncquest-test-report-pdf
+          path: reports/Oncquest_Test_Execution_Report.pdf
+          retention-days: 30
+
+      # Needs repo secrets: FROM_MAIL, PASSWORD (Gmail app password), MAIL_TO
+      - name: Send Report Email
+        if: always() && steps.email_report.outcome == 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.FROM_MAIL }}
+          password: ${{ secrets.PASSWORD }}
+          from: Oncquest Automation <${{ secrets.FROM_MAIL }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: ${{ steps.email_report.outputs.subject }}
+          html_body: file://reports/email-report.html
+          attachments: reports/Oncquest_Test_Execution_Report.pdf

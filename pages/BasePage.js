@@ -63,8 +63,11 @@ class BasePage {
     await this.page.addLocatorHandler(
       blocker,
       async () => {
-        if (await this.welcomeModalCloseBtn.isVisible()) await this.welcomeModalCloseBtn.click();
-        if (await this.cookieEssentialOnlyBtn.isVisible()) await this.cookieEssentialOnlyBtn.click();
+        // Short timeouts: another dialog (e.g. the city picker) can sit on top of these buttons,
+        // and a stuck handler would block the test's own action. The action retries the handler.
+        const close = (btn) => btn.click({ timeout: 5_000 }).catch(() => {});
+        if (await this.welcomeModalCloseBtn.isVisible()) await close(this.welcomeModalCloseBtn);
+        if (await this.cookieEssentialOnlyBtn.isVisible()) await close(this.cookieEssentialOnlyBtn);
       },
       { noWaitAfter: true },
     );

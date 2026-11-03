@@ -4,6 +4,7 @@ const HomePage = require('../pages/HomePage');
 const LoginPage = require('../pages/LoginPage');
 const BookTestPage = require('../pages/BookTestPage');
 const CentresPage = require('../pages/CentresPage');
+const PopupManager = require('../pages/PopupManager');
 const { HomeCollectionPage, GeneralEnquiryPage, UploadPrescriptionPage } = require('../pages/FormPage');
 
 /**
@@ -15,14 +16,17 @@ const test = base.test.extend({
   seedCity: [true, { option: true }],
   // Set `test.use({ blockCookieBanner: false })` to test the cookie consent banner itself
   blockCookieBanner: [true, { option: true }],
+  // Set `test.use({ handlePopups: false })` to stop popups being closed automatically
+  handlePopups: [true, { option: true }],
 
-  page: async ({ page, seedCity, blockCookieBanner }, use) => {
+  page: async ({ page, seedCity, blockCookieBanner, handlePopups }, use) => {
     const basePage = new BasePage(page);
     if (seedCity) await basePage.seedCity();
     if (blockCookieBanner) await basePage.blockCookieBanner();
-    await basePage.registerPopupHandler();
+    if (handlePopups) await basePage.registerPopupHandler();
     await use(page);
   },
+  popupManager: async ({ page }, use) => use(new PopupManager(page)),
   homePage: async ({ page }, use) => use(new HomePage(page)),
   loginPage: async ({ page }, use) => use(new LoginPage(page)),
   bookTestPage: async ({ page }, use) => use(new BookTestPage(page)),

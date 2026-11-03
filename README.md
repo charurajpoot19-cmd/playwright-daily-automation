@@ -15,11 +15,12 @@ Oncquest/
 │   ├── LoginPage.js
 │   ├── FormPage.js            # Home Collection / General Enquiry / Upload Prescription
 │   ├── BookTestPage.js
-│   └── CentresPage.js
+│   ├── CentresPage.js
+│   └── PopupManager.js        # Cookie banner, welcome modal, city dialog
 ├── test-data/
 │   └── testData.js            # All test data, URLs and expected messages
 ├── tests/
-│   ├── home.spec.js
+│   ├── homepage.spec.js            # complete homepage suite (14 modules)
 │   ├── search.spec.js
 │   ├── navigation.spec.js
 │   ├── login.spec.js
@@ -70,7 +71,7 @@ npx playwright test -g "TC_LOGIN_002"
 
 | Module | IDs | What is covered |
 |---|---|---|
-| Home | TC_HOME_001–010 | Title, logo, search bar, contact details, city popup, H1, page sections, menus, broken images, JS errors |
+| Homepage | TC_POP_*, TC_TOP_*, TC_NAV_01–07, TC_HERO_*, TC_QA_*, TC_HD_*, TC_PKG_*, TC_TAB_*, TC_TRUST_*, TC_REV_01, TC_BLOG_01, TC_FT_*, TC_SOC_*, TC_SEO_01–02, TC_HOME_002/007/009/010 | Popups, top bar, header & logo, hero carousel, floating quick actions, headings, packages, Book a Test tabs, trust pillars, testimonials & blogs, footer & legal links, social links, SEO, broken images, JS errors |
 | Search | TC_SRCH_001–006 | Suggestions, expected result, open test detail, case-insensitivity, no result, clear |
 | Navigation | TC_NAV_*, TC_PAGE_* | Every header sub-menu, Network, Upload Prescription, Login; HTTP 200 + title for key pages |
 | Login | TC_LOGIN_001–005 | UI, empty, short, too long and alphabetic mobile number |

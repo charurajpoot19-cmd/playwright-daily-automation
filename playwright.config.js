@@ -18,6 +18,8 @@ module.exports = defineConfig({
     ['list'],
     ['html', { outputFolder: 'reports/html-report', open: 'never' }],
     ['junit', { outputFile: 'reports/junit/results.xml' }],
+    // Read by scripts/email-report.js to build the daily email
+    ['json', { outputFile: 'reports/json/results.json' }],
   ],
 
   use: {
