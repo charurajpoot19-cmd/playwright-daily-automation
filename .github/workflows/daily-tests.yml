@@ -6,16 +6,22 @@ on:
   schedule:
     - cron: '30 3 * * *'
 
+permissions:
+  contents: read
+  actions: write # lets the keepalive step re-enable this workflow
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned so the ubuntu-latest move to Ubuntu 26 can't break the Playwright install
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -31,7 +37,7 @@ jobs:
 
       - name: Generate and Upload HTML Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-html-report
           path: reports/html-report/
@@ -45,7 +51,7 @@ jobs:
 
       - name: Upload PDF Report
         if: always() && steps.email_report.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: oncquest-test-report-pdf
           path: reports/Oncquest_Test_Execution_Report.pdf
@@ -54,7 +60,7 @@ jobs:
       # Needs repo secrets: FROM_MAIL, PASSWORD (Gmail app password), MAIL_TO
       - name: Send Report Email
         if: always() && steps.email_report.outcome == 'success'
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v24
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -66,3 +72,28 @@ jobs:
           subject: ${{ steps.email_report.outputs.subject }}
           html_body: file://reports/email-report.html
           attachments: reports/Oncquest_Test_Execution_Report.pdf
+
+      # Still send a mail when the run broke before a report could be built (install error, crash, timeout)
+      - name: Send Failure Alert Email
+        if: always() && steps.email_report.outcome != 'success'
+        uses: dawidd6/action-send-mail@v24
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.FROM_MAIL }}
+          password: ${{ secrets.PASSWORD }}
+          from: Oncquest Automation <${{ secrets.FROM_MAIL }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: '⚠️ Oncquest Daily Automation - run failed, no report generated'
+          html_body: |
+            <p>Today's Oncquest automation run did not complete, so no test report could be generated.</p>
+            <p>Check the run logs: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}</a></p>
+
+      # GitHub disables scheduled workflows after 60 days without repo activity; re-enabling keeps the daily run alive
+      - name: Keep Daily Schedule Alive
+        if: always() && github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/daily-tests.yml/enable"
