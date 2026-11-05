@@ -245,7 +245,8 @@ const html = `<!doctype html>
 </div></div></body></html>`;
 
 (async () => {
-  fs.writeFileSync(htmlFile, html);
+  // Gmail clips messages over ~102 KB, which would hide the last suites, so drop the indentation
+  fs.writeFileSync(htmlFile, html.replace(/>\s*\n\s*</g, '><'));
 
   // Same report as a PDF, with a running header/footer and page numbers
   const browser = await chromium.launch();
