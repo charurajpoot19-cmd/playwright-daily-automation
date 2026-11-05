@@ -208,6 +208,7 @@ test.describe('Oncquest Labs - Complete Master Homepage Test Suite', () => {
       ]) {
         test(`[${id}] Verify "${name}" Section H2 Heading Visibility and Text @regression`, async ({ page, homePage }) => {
           const heading = locatorKey ? homePage[locatorKey] : page.getByRole('heading', { name, level: 2 });
+          if (locatorKey === 'relatedBlogsSection') await homePage.waitForRelatedBlogs();
           await expect(heading).toBeVisible();
           await expect(heading).toHaveText(name);
         });
@@ -223,14 +224,13 @@ test.describe('Oncquest Labs - Complete Master Homepage Test Suite', () => {
       });
 
       test('[TC_HOME_007] Verify All Key Homepage Sections are Visible @regression', async ({ homePage }) => {
+        await homePage.waitForRelatedBlogs();
         const sections = {
           'Why Oncquest': homePage.whyOncquestSection,
           'Book a Test': homePage.bookATestSection,
           Wellness: homePage.wellnessSection,
           Offers: homePage.offersSection,
           Testimonials: homePage.testimonialsSection,
-          // Injected by a third-party widget (answers.oncquestlabs.com); on the live site it
-          // intermittently stays empty even when its API returns blogs - a site defect, not a test issue
           'Related blogs': homePage.relatedBlogsSection,
         };
         // toBeVisible does not need the element scrolled into view, so a missing
@@ -334,6 +334,7 @@ test.describe('Oncquest Labs - Complete Master Homepage Test Suite', () => {
 
       // The blog cards come from a third-party widget that intermittently stays empty on the live site
       test('[TC_BLOG_01] Verify Related Health Articles / Blog Cards Visibility @regression', async ({ homePage }) => {
+        await homePage.waitForRelatedBlogs();
         await homePage.relatedBlogsSection.scrollIntoViewIfNeeded();
         await expect(homePage.blogCards.first()).toBeVisible();
         expect(await homePage.blogCards.count()).toBeGreaterThan(0);

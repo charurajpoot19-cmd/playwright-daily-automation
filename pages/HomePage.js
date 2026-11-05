@@ -1,3 +1,4 @@
+const { expect } = require('@playwright/test');
 const BasePage = require('./BasePage');
 
 class HomePage extends BasePage {
@@ -51,6 +52,22 @@ class HomePage extends BasePage {
 
     // Footer bottom bar
     this.copyrightBar = this.footer.locator('.copyright-text');
+  }
+
+  /**
+   * Wait for the "Related blogs" widget (third party, answers.oncquestlabs.com). It gives up
+   * silently if its API takes over 5 seconds and never retries, so the section stays missing
+   * until the page is reloaded. Reloading covers a slow response; an outage still fails here.
+   */
+  async waitForRelatedBlogs() {
+    await expect(async () => {
+      try {
+        await expect(this.relatedBlogsSection).toBeVisible({ timeout: 10_000 });
+      } catch (error) {
+        await this.page.reload({ waitUntil: 'domcontentloaded' });
+        throw error;
+      }
+    }).toPass({ timeout: 30_000 });
   }
 
   /** Floating quick action button by its label, e.g. "Cart", "Find a Test". */

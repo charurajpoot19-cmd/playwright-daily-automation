@@ -29,6 +29,10 @@ class BasePage {
     this.headerLoginBtn = this.header.getByRole('button', { name: 'Login' });
     this.headerCitySelect = page.locator('.cityBox select').last();
 
+    // Breadcrumb under the header on inner pages
+    this.breadcrumbCurrent = page.locator('.breadcrumb-item.active');
+    this.breadcrumbHome = page.locator('.breadcrumb-item a[href="/"]');
+
     // Footer
     this.footer = page.locator('footer');
   }
@@ -134,6 +138,15 @@ class BasePage {
       await this.searchInput.pressSequentially(keyword, { delay: 80, timeout: 5_000 });
       await expect(this.searchInput).toHaveValue(keyword, { timeout: 1_000 });
     }).toPass({ timeout: 30_000 });
+  }
+
+  /** Wait for `images` to finish loading, then fail on any that came back broken. */
+  async expectImagesLoaded(images) {
+    await expect
+      .poll(() => images.evaluateAll((list) => list.every((img) => img.complete)), { timeout: 30_000 })
+      .toBe(true);
+    const broken = await images.evaluateAll((list) => list.filter((img) => img.naturalWidth === 0).map((img) => img.src));
+    expect(broken, `Broken images: ${broken.join(', ')}`).toHaveLength(0);
   }
 
   footerLink(name) {

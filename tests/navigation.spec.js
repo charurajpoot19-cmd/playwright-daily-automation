@@ -15,6 +15,12 @@ test.describe('Header Navigation', () => {
     }
   }
 
+  test('TC_NAV_PATIENT - Patient dropdown lists all its links in order on hover @smoke', async ({ homePage }) => {
+    const menu = homePage.headerMenu('Patient');
+    await menu.hover();
+    await expect(menu.locator('.h_dropdown-menu a')).toHaveText(testData.headerMenus.Patient.map(({ name }) => name));
+  });
+
   test('TC_NAV_NETWORK - Network menu opens centres page @smoke', async ({ page, homePage }) => {
     await homePage.headerMenu('Network').click();
     await expect(page).toHaveURL(/\/centres$/);

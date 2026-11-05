@@ -16,6 +16,12 @@ Oncquest/
 │   ├── FormPage.js            # Home Collection / General Enquiry / Upload Prescription
 │   ├── BookTestPage.js
 │   ├── CentresPage.js
+│   ├── OffersPage.js
+│   ├── PrivilegeCardPage.js
+│   ├── PackagesPage.js        # Preventive health package listing + enquiry form
+│   ├── TestimonialsPage.js
+│   ├── FaqPage.js
+│   ├── QuickLinksPage.js
 │   └── PopupManager.js        # Cookie banner, welcome modal, city dialog
 ├── test-data/
 │   └── testData.js            # All test data, URLs and expected messages
@@ -26,6 +32,13 @@ Oncquest/
 │   ├── login.spec.js
 │   ├── forms.spec.js
 │   ├── book-test-and-centres.spec.js
+│   ├── centres.spec.js
+│   ├── offers.spec.js
+│   ├── privilege-membership-card.spec.js
+│   ├── preventive-packages.spec.js
+│   ├── testimonials.spec.js
+│   ├── faq.spec.js
+│   ├── quick-links.spec.js
 │   ├── footer-seo.spec.js
 │   └── responsive.mobile.spec.js   # runs only on the mobile project
 ├── playwright.config.js
@@ -76,7 +89,14 @@ npx playwright test -g "TC_LOGIN_002"
 | Navigation | TC_NAV_*, TC_PAGE_* | Every header sub-menu, Network, Upload Prescription, Login; HTTP 200 + title for key pages |
 | Login | TC_LOGIN_001–005 | UI, empty, short, too long and alphabetic mobile number |
 | Forms | TC_HC_*, TC_GE_*, TC_UP_* | Fields displayed, mandatory field errors, invalid mobile, dropdown data |
-| Book a Test / Centres | TC_BOOK_*, TC_CEN_* | Test listing, BOOK NOW, centre filters, state → city dependency |
+| Book a Test / Centres | TC_BOOK_*, TC_CEN_001–003 | Test listing, BOOK NOW, centre filters, state → city dependency |
+| Centre Finder | TC_CEN_004–017 | Centre cards, Load More, directions, share, detail page, locality search, state/zone/lab filters, map pins |
+| Offers | TC_OFF_001–006 | Heading, banners, broken images, breadcrumb, banner links and alt text |
+| Privilege Membership Card | TC_PMC_001–013 | Card details, request form fields, mandatory errors, mobile and email validation, terms links |
+| Preventive Packages | TC_PHC_001–012 | Package cards, price, detail page, BOOK NOW → cart, sample report PDFs, articles, enquiry form validation |
+| Testimonials | TC_TST_001–005 | Banner, listing, statement and name on every card, photos, page title |
+| FAQ | TC_FAQ_001–012 | Categories, expand/collapse, one answer open at a time, Popular Tests links |
+| Quick Links | TC_QL_001–013 | Card list, descriptions, images, every KNOW MORE link and the page it opens |
 | Footer / SEO | TC_FOOT_*, TC_SEO_* | Footer links, social links, meta description, single H1, HTTPS, DOM ready time |
 | Mobile | TC_MOB_001–003 | Horizontal scroll, login and form usability on Pixel 7 |
 
@@ -89,6 +109,9 @@ npx playwright test -g "TC_LOGIN_002"
   Use `test.use({ seedCity: false })` to test as a first-time visitor.
 - **No real submissions.** Successful form submissions and OTP login are **not** automated on
   production because they create real leads / send real SMS. Run those on a staging environment.
+- **Known defects.** A test titled `(known defect)` checks the correct behaviour and is marked
+  `test.fail()` because the site does not meet it yet. It reports as passed while the defect
+  exists and fails once the site is fixed; remove the `test.fail()` line and the title suffix then.
 - **Tags.** Every test is tagged `@smoke` or `@regression` for selective runs.
 - **Waits.** No `load`/`networkidle` waits – third-party trackers keep the network busy on this
   site. Tests rely on Playwright's auto-waiting assertions instead.
