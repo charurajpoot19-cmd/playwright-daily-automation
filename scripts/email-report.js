@@ -1,8 +1,8 @@
 /**
- * Builds the test execution report from Playwright's JSON report.
+ * Builds the daily email from Playwright's JSON report.
  *   Input:  reports/json/results.json
- *   Output: reports/email-report.html                    (email body)
- *           reports/Oncquest_Test_Execution_Report.pdf   (email attachment)
+ *   Output: reports/email-report.html                    (short cover note, the email body)
+ *           reports/Oncquest_Test_Execution_Report.pdf   (full report, the email attachment)
  * On GitHub Actions it also writes the email subject to $GITHUB_OUTPUT.
  *
  * Usage: node scripts/email-report.js
@@ -66,9 +66,6 @@ const runDate = started.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day:
 const projects = report.config.projects.map((p) => p.name).join(', ');
 const workers = report.config.workers;
 
-const runUrl = process.env.GITHUB_RUN_ID
-  ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-  : '';
 const executedBy = process.env.GITHUB_RUN_NUMBER ? `GitHub Actions (run #${process.env.GITHUB_RUN_NUMBER})` : 'Local run';
 
 // ---------- Per spec file summary ----------
@@ -173,13 +170,10 @@ const html = `<!doctype html>
   .err { margin:5px 0 0; padding:6px; background:#fef2f2; border-radius:4px; font-size:10px; white-space:pre-wrap; color:#7f1d1d; font-weight:400; }
   .sign td { border:1px solid #d6dbe4; padding:8px; }
   .sign td.k { font-weight:700; background:#f8fafc; width:18%; }
-  .btn { display:inline-block; padding:9px 16px; background:#1e3a8a; color:#fff !important; text-decoration:none; border-radius:5px; font-weight:700; font-size:12px; }
-  .foot { margin-top:14px; padding-top:8px; border-top:1px solid #d6dbe4; font-size:10px; color:#6b7280; display:flex; justify-content:space-between; }
   @media print {
     body { background:#fff; padding:0; }
     .page { border:none; max-width:none; }
     .wrap { padding:0; }
-    .no-print { display:none; }
     * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 </style></head>
@@ -237,16 +231,23 @@ const html = `<!doctype html>
         <td class="k">QA Sign-off:</td><td>[ QA Sign-off ]</td></tr>
   </table>
 
-  ${runUrl ? `<div class="no-print" style="margin-top:16px;"><a class="btn" href="${runUrl}">View run on GitHub</a>
-    <span class="muted small" style="margin-left:8px;">Screenshots, videos and traces: download "playwright-html-report" from the run page.</span></div>` : ''}
-
-  <div class="foot no-print"><span>Oncquest Automation Test Execution Report &bull; ${esc(baseUrl)}</span><span>Total: ${passed + flaky} / ${total - skipped} Tests Passed (${passRate}%)</span></div>
 
 </div></div></body></html>`;
 
+// Cover note sent as the email body; the full report above goes out as the PDF attachment
+const emailBody = `<!doctype html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;line-height:1.5;">
+<p>Hi Sir,</p>
+<p>Please find attached the PDF report containing the current status of test case automation for the Oncquest website.</p>
+<p>A total of ${total} test cases have been prepared. Automation testing is currently in progress, and the remaining test cases are yet to be completed.</p>
+<p>The attached report includes the available test cases and their current execution status.</p>
+<p>I will share the updated report once the remaining automation testing is completed.</p>
+<p>Regards,<br>Charu Rajpoot<br>QA Engineer</p>
+</body></html>`;
+
 (async () => {
-  // Gmail clips messages over ~102 KB, which would hide the last suites, so drop the indentation
-  fs.writeFileSync(htmlFile, html.replace(/>\s*\n\s*</g, '><'));
+  fs.writeFileSync(htmlFile, emailBody);
 
   // Same report as a PDF, with a running header/footer and page numbers
   const browser = await chromium.launch();
